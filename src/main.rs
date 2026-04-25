@@ -1,12 +1,13 @@
+use std::io;
 
 struct Board {
-    grid: Vec<Vec<bool>>,
+    grid: Vec<Vec<char>>,
 }
 
 impl Board {
     /// Creates a new [`Board`].
     fn new(width: usize, height: usize ) -> Self {
-        let grid: Vec<Vec<bool>> = vec![vec![false; width]; height];
+        let grid: Vec<Vec<char>> = vec![vec!['O'; width]; height];
         Self { grid }
     }
 
@@ -15,15 +16,33 @@ impl Board {
 
         for row in &mut self.grid {
             for cell in row.iter_mut() {
-                *cell = rand::random_bool(probability);
+                let alive: bool = rand::random_bool(probability);
+                if alive {
+                    *cell = 'X';
+                } else {
+                    *cell = 'O';
+                }
             }
         }
         self
     }
+
+    fn print_board(&mut self) {
+        for row in &self.grid {
+            println!("{:?}",row);
+        }
+    }
 }
 
 fn main () {
-   let mut g = Board::new( 10, 10 ); 
-   g.randomize(0.5);
-   println!("{}", g.grid[0][1]);
+    let mut run: bool = true;
+    let mut input: String = String::new();
+    let stdin = io::stdin();
+    let mut g = Board::new( 10, 10 );
+    g.randomize(0.5);
+    while run {
+        g.print_board();
+        stdin.read_line(&mut input);
+        run = false;
+    }
 }
