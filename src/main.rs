@@ -1,48 +1,39 @@
-use std::io;
+//use std::io;
+use std::collections::HashMap;
 
 struct Board {
-    grid: Vec<Vec<char>>,
+    grid: HashMap<(i64,i64),bool>,
 }
 
 impl Board {
     /// Creates a new [`Board`].
-    fn new(width: usize, height: usize ) -> Self {
-        let grid: Vec<Vec<char>> = vec![vec!['O'; width]; height];
+    fn new( ) -> Self {
+        let grid = HashMap::new();
         Self { grid }
     }
-
-    /// Randomize Board
-    fn randomize(&mut self, probability: f64) -> &Self {
-
-        for row in &mut self.grid {
-            for cell in row.iter_mut() {
-                let alive: bool = rand::random_bool(probability);
-                if alive {
-                    *cell = 'X';
-                } else {
-                    *cell = 'O';
-                }
+    // Look into the "Builder Pattern" for optional parameters
+    fn random_board ( &mut self, width: i64, height: i64 ) {
+        let x_origin: i64 = 0;
+        let y_origin: i64 = 0;
+        for x in x_origin..width {
+            for y in y_origin..height {
+                let point = (x,y);
+                let state: bool = rand::random();
+                self.grid.insert(point,state);
             }
         }
-        self
     }
 
-    fn print_board(&mut self) {
-        for row in &self.grid {
-            println!("{:?}",row);
+    fn dissect (self) {
+        for (k,v) in self.grid {
+            println!("{:?}: {:?}", k, v);
         }
     }
+
 }
 
 fn main () {
-    let mut run: bool = true;
-    let mut input: String = String::new();
-    let stdin = io::stdin();
-    let mut g = Board::new( 10, 10 );
-    g.randomize(0.5);
-    while run {
-        g.print_board();
-        stdin.read_line(&mut input);
-        run = false;
-    }
+    let mut my_board = Board::new();
+    my_board.random_board(10,12);
+    my_board.dissect();
 }
