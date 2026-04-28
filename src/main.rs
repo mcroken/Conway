@@ -7,7 +7,7 @@ struct Board {
 
 impl Board {
     /// Creates a new [`Board`].
-    fn new( ) -> Self {
+    fn new ( ) -> Self {
         let grid = HashMap::new();
         Self { grid }
     }
@@ -24,10 +24,68 @@ impl Board {
         }
     }
 
-    fn dissect (self) {
+    fn dissect ( self ) {
         for (k,v) in self.grid {
             println!("{:?}: {:?}", k, v);
         }
+    }
+
+    fn display ( self, width: i64, height: i64 ) {
+        let x_origin: i64 = 0;
+        let y_origin: i64 = 0;
+        for x in x_origin..width {
+            let mut row = Vec::new();
+            for y in y_origin..height {
+                let coordinate: (i64,i64) = (x,y);
+                let state: bool = self.grid.get( &coordinate ).copied().unwrap_or(false);
+                if state {
+                    row.push('O');
+                } else {
+                    row.push(' ');
+                }
+            }
+            println!("{:?}",row)
+        }
+    }
+
+    fn count_neighbors ( &self, coordinate: (i64,i64) ) -> i8 {
+        let (x,y) = coordinate;
+        let mut live_count: i8 = 0;
+        for i in x-1..x+1{
+            for j in y-1..y+1{
+                if i == x && j == y {
+                    continue;
+                }
+                let state: bool = self.grid.get( &coordinate ).copied().unwrap_or(false);
+                if state {
+                    live_count += 1;
+                }
+            }
+        }
+        live_count
+    }
+
+    // Needs min-max logic to check boundary coords
+    fn cycle ( self ) -> Board {
+        let mut next_generation: Board = Board::new();
+        for (coord, state) in &self.grid {
+            let live_count = self.count_neighbors( *coord );
+            if *state {
+                if live_count == 2 || live_count == 3 {
+                    next_generation.grid.insert ( *coord, true );
+                } else {
+                    next_generation.grid.insert ( *coord, false );
+                }
+            } else {
+                if live_count == 3 {
+                    next_generation.grid.insert ( *coord, true );
+                } else {
+                    next_generation.grid.insert ( *coord, false );
+                }
+            }
+        }
+        next_generation
+
     }
 
 }
@@ -35,5 +93,7 @@ impl Board {
 fn main () {
     let mut my_board = Board::new();
     my_board.random_board(10,12);
-    my_board.dissect();
+    // Loop cycle calls, pause for input betweeen each iter.
+
+    my_board.display(10,12);
 }
