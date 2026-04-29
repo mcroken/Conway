@@ -1,5 +1,6 @@
 //use std::io;
 use std::collections::HashMap;
+use proceed::any_or_quit_with;
 
 struct Board {
     grid: HashMap<(i64,i64),bool>,
@@ -30,12 +31,12 @@ impl Board {
         }
     }
 
-    fn display ( self, width: i64, height: i64 ) {
+    fn display ( &self, width: i64, height: i64 ) {
         let x_origin: i64 = 0;
         let y_origin: i64 = 0;
-        for x in x_origin..width {
+        for y in (y_origin..height).rev() {
             let mut row = Vec::new();
-            for y in y_origin..height {
+            for x in x_origin..width {
                 let coordinate: (i64,i64) = (x,y);
                 let state: bool = self.grid.get( &coordinate ).copied().unwrap_or(false);
                 if state {
@@ -47,7 +48,7 @@ impl Board {
             println!("{:?}",row)
         }
     }
-
+    //Not giving the right count
     fn count_neighbors ( &self, coordinate: (i64,i64) ) -> i8 {
         let (x,y) = coordinate;
         let mut live_count: i8 = 0;
@@ -56,7 +57,8 @@ impl Board {
                 if i == x && j == y {
                     continue;
                 }
-                let state: bool = self.grid.get( &coordinate ).copied().unwrap_or(false);
+                let neighbor= (i,j);
+                let state: bool = self.grid.get( &neighbor ).copied().unwrap_or(false);
                 if state {
                     live_count += 1;
                 }
@@ -66,10 +68,11 @@ impl Board {
     }
 
     // Needs min-max logic to check boundary coords
-    fn cycle ( self ) -> Board {
+    fn cycle ( &self ) -> Board {
         let mut next_generation: Board = Board::new();
         for (coord, state) in &self.grid {
             let live_count = self.count_neighbors( *coord );
+            println!("{:?}:{}",coord,live_count);
             if *state {
                 if live_count == 2 || live_count == 3 {
                     next_generation.grid.insert ( *coord, true );
@@ -94,6 +97,12 @@ fn main () {
     let mut my_board = Board::new();
     my_board.random_board(10,12);
     // Loop cycle calls, pause for input betweeen each iter.
+    loop {
+        if !any_or_quit_with('q'){
+            break;
+        }
+        my_board = my_board.cycle();
+        my_board.display(10,12);
+    }
 
-    my_board.display(10,12);
 }
