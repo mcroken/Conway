@@ -25,12 +25,6 @@ impl Board {
         }
     }
 
-    fn dissect ( self ) {
-        for (k,v) in self.grid {
-            println!("{:?}: {:?}", k, v);
-        }
-    }
-
     fn display ( &self, width: i64, height: i64 ) {
         let x_origin: i64 = 0;
         let y_origin: i64 = 0;
@@ -52,8 +46,8 @@ impl Board {
     fn count_neighbors ( &self, coordinate: (i64,i64) ) -> i8 {
         let (x,y) = coordinate;
         let mut live_count: i8 = 0;
-        for i in x-1..x+1{
-            for j in y-1..y+1{
+        for i in x-1..x+2{
+            for j in y-1..y+2{
                 if i == x && j == y {
                     continue;
                 }
@@ -70,9 +64,23 @@ impl Board {
     // Needs min-max logic to check boundary coords
     fn cycle ( &self ) -> Board {
         let mut next_generation: Board = Board::new();
+        let mut x_min: Option<i64> = None;
+        let mut x_max: Option<i64> = None;
+        let mut y_min: Option<i64> = None;
+        let mut y_max: Option<i64> = None;
         for (coord, state) in &self.grid {
+            let mut (x,y) = coord;
+            if x_min.is_none() || x < x_min.unwrap() {
+                x_min = x;
+            } else if x == None || x > x_max {
+                x_max = x;
+            }
+            if y == None || y < y_min {
+                y_min = y;
+            } else if y == None || y > y_max {
+                y_max = y;
+            }
             let live_count = self.count_neighbors( *coord );
-            println!("{:?}:{}",coord,live_count);
             if *state {
                 if live_count == 2 || live_count == 3 {
                     next_generation.grid.insert ( *coord, true );
@@ -88,7 +96,6 @@ impl Board {
             }
         }
         next_generation
-
     }
 
 }
