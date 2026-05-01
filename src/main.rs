@@ -4,18 +4,24 @@ use proceed::any_or_quit_with;
 
 struct Board {
     grid: HashMap<(i64,i64),bool>,
+    width: i64,
+    height: i64,
 }
 
 impl Board {
     /// Creates a new [`Board`].
     fn new ( ) -> Self {
         let grid = HashMap::new();
-        Self { grid }
+        let height: i64 = 0;
+        let width: i64 = 0;
+        Self { grid, height, width }
     }
     // Look into the "Builder Pattern" for optional parameters
     fn random_board ( &mut self, width: i64, height: i64 ) {
         let x_origin: i64 = 0;
         let y_origin: i64 = 0;
+        self.width = width;
+        self.height = height;
         for x in x_origin..width {
             for y in y_origin..height {
                 let point = (x,y);
@@ -42,7 +48,7 @@ impl Board {
             println!("{:?}",row)
         }
     }
-    //Not giving the right count
+
     fn count_neighbors ( &self, coordinate: (i64,i64) ) -> i8 {
         let (x,y) = coordinate;
         let mut live_count: i8 = 0;
@@ -64,22 +70,8 @@ impl Board {
     // Needs min-max logic to check boundary coords
     fn cycle ( &self ) -> Board {
         let mut next_generation: Board = Board::new();
-        let mut x_min: Option<i64> = None;
-        let mut x_max: Option<i64> = None;
-        let mut y_min: Option<i64> = None;
-        let mut y_max: Option<i64> = None;
+
         for (coord, state) in &self.grid {
-            let mut (x,y) = coord;
-            if x_min.is_none() || x < x_min.unwrap() {
-                x_min = x;
-            } else if x == None || x > x_max {
-                x_max = x;
-            }
-            if y == None || y < y_min {
-                y_min = y;
-            } else if y == None || y > y_max {
-                y_max = y;
-            }
             let live_count = self.count_neighbors( *coord );
             if *state {
                 if live_count == 2 || live_count == 3 {
@@ -101,15 +93,16 @@ impl Board {
 }
 
 fn main () {
+    let width = 10;
+    let height = 10;
     let mut my_board = Board::new();
-    my_board.random_board(10,12);
+    my_board.random_board(width,height);
     // Loop cycle calls, pause for input betweeen each iter.
     loop {
+        my_board.display(width,height);
         if !any_or_quit_with('q'){
             break;
         }
         my_board = my_board.cycle();
-        my_board.display(10,12);
     }
-
 }
